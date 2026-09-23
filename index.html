@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Money Journal</title>
+<style>
+:root{
+  --pink:#ff7eae;--pink2:#ffd6e5;--cream:#fff9f5;--brown:#684957;
+  --lav:#eee7ff;--green:#78b89b;--red:#e77991;--shadow:0 12px 35px rgba(104,73,87,.12);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#fff7fa;color:var(--brown)}
+button,input,select{font:inherit}
+.hidden{display:none!important}
+.app{min-height:100vh}
+.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#fff4f8,#f6efff)}
+.auth-card{width:min(440px,100%);background:#fff;border-radius:30px;padding:34px;box-shadow:var(--shadow);text-align:center}
+.logo{font-size:42px}.auth-card h1{margin:8px 0 5px}.sub{color:#9a7f89;margin-bottom:25px}
+.field{text-align:left;margin:13px 0}.field label{font-size:13px;font-weight:700;display:block;margin-bottom:7px}
+input,select{width:100%;border:1px solid #f0dbe3;background:#fffafd;border-radius:14px;padding:12px 14px;outline:none}
+input:focus,select:focus{border-color:var(--pink)}
+.primary,.danger,.ghost{border:0;border-radius:14px;padding:12px 16px;cursor:pointer;font-weight:700}
+.primary{background:var(--pink);color:#fff}.danger{background:#ffe3ea;color:#c55270}.ghost{background:#fff1f6;color:#9b526e}
+.link{border:0;background:none;color:#e45d8c;cursor:pointer;font-weight:700}
+.shell{display:flex;min-height:100vh}
+.sidebar{width:245px;background:#fff;border-right:1px solid #f5e4ea;padding:22px 15px;position:fixed;left:0;top:0;bottom:0;z-index:5}
+.brand{display:flex;gap:10px;align-items:center;padding:8px 10px 24px;font-weight:800;font-size:19px}
+.brand span{font-size:29px}
+.nav button{width:100%;text-align:left;border:0;background:none;padding:13px 14px;border-radius:14px;color:#765563;cursor:pointer;margin:3px 0}
+.nav button.active,.nav button:hover{background:#fff0f5;color:#d94f82}
+.profile-mini{position:absolute;bottom:20px;left:15px;right:15px;background:#fff7fa;border-radius:18px;padding:10px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#ffdce8;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden}
+.main{margin-left:245px;width:calc(100% - 245px);padding:28px;max-width:1500px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.top h2{margin:0}.date{color:#9a7f89;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:#fff;border-radius:22px;padding:20px;box-shadow:var(--shadow);border:1px solid #f7e8ed}
+.stat{min-height:130px}.stat small{color:#a1848e}.stat b{display:block;font-size:24px;margin-top:13px}.icon{font-size:26px;float:right}
+.balance{background:linear-gradient(135deg,#ff85b4,#f4a9cb);color:#fff}.balance small{color:#fff}.balance .muted{color:#fff8fb}
+.content-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;margin-top:18px}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.section-title h3{margin:0}
+.monthbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.monthbar input,.monthbar select{width:auto}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.table-wrap{overflow:auto}.tx{width:100%;border-collapse:collapse}.tx th,.tx td{text-align:left;padding:12px 8px;border-bottom:1px solid #f4e7eb;font-size:14px}.tx th{color:#9b808a}
+.in{color:#4f9a77;font-weight:700}.out{color:#d75f7b;font-weight:700}
+.empty{text-align:center;color:#aa929b;padding:30px}
+.bunny{font-size:80px;text-align:center;margin:8px}.quote{background:#fff4d9;padding:14px;border-radius:16px;line-height:1.5}
+.modal{position:fixed;inset:0;background:rgba(75,46,59,.35);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+.modal-box{background:#fff;border-radius:25px;width:min(620px,100%);max-height:90vh;overflow:auto;padding:24px}
+.modal-head{display:flex;justify-content:space-between;align-items:center}.close{border:0;background:#fff0f5;border-radius:50%;width:35px;height:35px;cursor:pointer}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.preview{width:90px;height:90px;border-radius:50%;object-fit:cover;background:#ffe0eb}
+.report-list{display:grid;gap:12px}.day-row{background:#fff8fa;border-radius:16px;padding:14px}.day-row strong{display:block;margin-bottom:7px}
+.nail{position:fixed;right:22px;bottom:18px;font-size:52px;filter:drop-shadow(0 5px 8px #d7a0b4);animation:float 2.5s ease-in-out infinite;z-index:8}
+@keyframes float{50%{transform:translateY(-9px) rotate(3deg)}}
+.toast{position:fixed;right:22px;top:22px;background:#654653;color:#fff;padding:13px 17px;border-radius:14px;z-index:30;box-shadow:var(--shadow)}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.content-grid{grid-template-columns:1fr}}
+@media(max-width:720px){
+ .sidebar{position:static;width:100%;height:auto}.shell{display:block}.main{margin:0;width:100%;padding:16px}
+ .profile-mini{position:static;margin-top:10px}.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.nav button{font-size:12px;text-align:center}
+ .grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.top{align-items:flex-start;gap:10px}
+}
+</style>
+</head>
+<body>
+<div id="toast" class="toast hidden"></div>
+
+<section id="auth" class="auth">
+  <div class="auth-card">
+    <div class="logo">🎀🐻</div>
+    <h1>My Money Journal</h1>
+    <div class="sub">Catat uangmu dengan rapi & manis ✨</div>
+    <div id="loginBox">
+      <div class="field"><label>Email</label><input id="loginEmail" type="email" placeholder="nama@email.com"></div>
+      <div class="field"><label>Password</label><input id="loginPass" type="password" placeholder="••••••••"></div>
+      <button class="primary" style="width:100%" onclick="login()">Masuk 💗</button>
+      <p>Belum punya akun? <button class="link" onclick="showRegister()">Daftar sekarang</button></p>
+    </div>
+    <div id="registerBox" class="hidden">
+      <div class="field"><label>Nama</label><input id="regName" placeholder="Nama kamu"></div>
+      <div class="field"><label>Email</label><input id="regEmail" type="email" placeholder="nama@email.com"></div>
+      <div class="field"><label>Password</label><input id="regPass" type="password" placeholder="minimal 4 karakter"></div>
+      <button class="primary" style="width:100%" onclick="register()">Buat Akun 🎀</button>
+      <p>Sudah punya akun? <button class="link" onclick="showLogin()">Masuk</button></p>
+    </div>
+    <div style="font-size:12px;color:#aa929b;margin-top:15px">Data tersimpan di browser ini (localStorage).</div>
+  </div>
+</section>
+
+<section id="app" class="app hidden">
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand"><span>🎀</span> My Money Journal</div>
+  <div class="nav">
+    <button id="navDashboard" class="active" onclick="page('dashboard')">🏠 Dashboard</button>
+    <button id="navTransactions" onclick="page('transactions')">🧾 Transaksi</button>
+    <button id="navReports" onclick="page('reports')">📊 Laporan</button>
+    <button onclick="openProfile()">👩 Profil</button>
+    <button onclick="logout()">🚪 Keluar</button>
+  </div>
+  <div class="profile-mini" onclick="openProfile()"><div id="miniAvatar" class="avatar">🐰</div><div><b id="miniName">Nama</b><small style="display:block;color:#a1848e">Profil saya</small></div></div>
+</aside>
+
+<main class="main">
+  <div class="top">
+    <div><h2 id="pageTitle">Dashboard 💗</h2><div class="date" id="today"></div></div>
+    <div class="actions"><button class="primary" onclick="openTransaction('out')">− Pengeluaran</button><button class="ghost" onclick="openTransaction('in')">＋ Uang Masuk</button></div>
+  </div>
+
+  <div id="dashboardPage">
+    <div class="monthbar" style="margin-bottom:16px">
+      <label>Bulan aktif:</label><input type="month" id="activeMonth" onchange="renderAll()">
+      <button class="ghost" onclick="openBalance()">⚙️ Atur saldo bulan</button>
+    </div>
+    <div class="grid">
+      <div class="card stat balance"><span class="icon">💰</span><small>Saldo saat ini</small><b id="statBalance">Rp0</b><div class="muted">Saldo aktif bulan ini</div></div>
+      <div class="card stat"><span class="icon">📤</span><small>Total pengeluaran</small><b id="statOut">Rp0</b><div style="color:#a1848e">Bulan aktif</div></div>
+      <div class="card stat"><span class="icon">📥</span><small>Total uang masuk</small><b id="statIn">Rp0</b><div style="color:#a1848e">Bulan aktif</div></div>
+      <div class="card stat"><span class="icon">🧸</span><small>Jumlah transaksi</small><b id="statCount">0</b><div style="color:#a1848e">Bulan aktif</div></div>
+    </div>
+    <div class="content-grid">
+      <div class="card">
+        <div class="section-title"><h3>Transaksi terbaru</h3><button class="link" onclick="page('transactions')">Lihat semua</button></div>
+        <div id="recent"></div>
+      </div>
+      <div class="card">
+        <div class="section-title"><h3>Ringkasan hari ini 🌷</h3></div>
+        <div id="todaySummary"></div>
+        <div class="quote" style="margin-top:15px">🌸 Pelan-pelan, yang penting kamu tahu uangmu pergi ke mana.</div>
+        <div class="bunny">🧸</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="transactionsPage" class="hidden">
+    <div class="card">
+      <div class="section-title">
+        <h3>Riwayat transaksi</h3>
+        <div class="monthbar"><input type="month" id="txMonth" onchange="renderTransactions()"><input type="date" id="txDate" onchange="renderTransactions()"></div>
+      </div>
+      <div class="actions" style="margin-bottom:14px"><button class="ghost" onclick="clearTxFilters()">Semua tanggal</button><button class="primary" onclick="openTransaction('out')">+ Pengeluaran</button><button class="ghost" onclick="openTransaction('in')">+ Uang masuk</button></div>
+      <div id="transactionTable" class="table-wrap"></div>
+    </div>
+  </div>
+
+  <div id="reportsPage" class="hidden">
+    <div class="card">
+      <div class="section-title"><h3>Laporan keuangan 📊</h3><div class="monthbar"><input type="month" id="reportMonth" onchange="renderReports()"><input type="date" id="reportDate" onchange="renderReports()"></div></div>
+      <div id="reportContent"></div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <div class="section-title"><h3>Riwayat semua bulan</h3></div>
+      <div id="monthHistory" class="report-list"></div>
+    </div>
+  </div>
+</main>
+</div>
+<div class="nail">💅</div>
+</section>
+
+<div id="modal" class="modal hidden"><div class="modal-box" id="modalBox"></div></div>
+
+<script>
+const KEY='mmj_users_v2';
+let currentUser=null;
+let users=JSON.parse(localStorage.getItem(KEY)||'{}');
+
+function save(){localStorage.setItem(KEY,JSON.stringify(users))}
+function money(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n||0)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function currentMonth(){return new Date().toISOString().slice(0,7)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function toast(t){let x=document.getElementById('toast');x.textContent=t;x.classList.remove('hidden');setTimeout(()=>x.classList.add('hidden'),2200)}
+function showLogin(){loginBox.classList.remove('hidden');registerBox.classList.add('hidden')}
+function showRegister(){loginBox.classList.add('hidden');registerBox.classList.remove('hidden')}
+function register(){
+ let name=regName.value.trim(),email=regEmail.value.trim().toLowerCase(),pass=regPass.value;
+ if(!name||!email||pass.length<4)return toast('Lengkapi data dan password minimal 4 karakter.');
+ if(users[email])return toast('Email sudah terdaftar.');
+ users[email]={name,email,password:pass,avatar:'',months:{},transactions:[]};save();toast('Akun berhasil dibuat 💗');showLogin();loginEmail.value=email;
+}
+function login(){
+ let email=loginEmail.value.trim().toLowerCase(),pass=loginPass.value;
+ if(!users[email]||users[email].password!==pass)return toast('Email atau password salah.');
+ currentUser=users[email];localStorage.setItem('mmj_session',email);startApp();
+}
+function logout(){localStorage.removeItem('mmj_session');currentUser=null;app.classList.add('hidden');auth.classList.remove('hidden');}
+function startApp(){auth.classList.add('hidden');app.classList.remove('hidden');activeMonth.value=currentMonth();txMonth.value=currentMonth();reportMonth.value=currentMonth();document.getElementById('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});updateProfileMini();renderAll()}
+function updateProfileMini(){miniName.textContent=currentUser.name;miniAvatar.innerHTML=currentUser.avatar?`<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover">`:'🐰'}
+function getMonth(m){if(!currentUser.months[m])currentUser.months[m]={initial:0};return currentUser.months[m]}
+function txForMonth(m){return currentUser.transactions.filter(t=>t.date.startsWith(m))}
+function totals(m){
+ let a=getMonth(m),tx=txForMonth(m),ins=tx.filter(x=>x.type==='in').reduce((s,x)=>s+x.amount,0),outs=tx.filter(x=>x.type==='out').reduce((s,x)=>s+x.amount,0);
+ return {initial:a.initial||0,ins,outs,balance:(a.initial||0)+ins-outs,tx}
+}
+function renderAll(){let m=activeMonth.value||currentMonth();renderDashboard(m);renderTransactions();renderReports()}
+function renderDashboard(m){
+ let t=totals(m);statBalance.textContent=money(t.balance);statOut.textContent=money(t.outs);statIn.textContent=money(t.ins);statCount.textContent=t.tx.length;
+ let recent=t.tx.slice().sort((a,b)=>(b.created||'').localeCompare(a.created||'')).slice(0,7);
+ recentDiv=recent.length?`<table class="tx"><tr><th>Tanggal</th><th>Keterangan</th><th>Nominal</th></tr>${recent.map(x=>`<tr><td>${x.date}</td><td>${x.note}</td><td class="${x.type==='in'?'in':'out'}">${x.type==='in'?'+':'−'}${money(x.amount)}</td></tr>`).join('')}</table>`:`<div class="empty">Belum ada transaksi bulan ini 🌷</div>`;
+ document.getElementById('recent').innerHTML=recentDiv;
+ let today=new Date().toISOString().slice(0,10),day=t.tx.filter(x=>x.date===today),di=day.filter(x=>x.type==='in').reduce((s,x)=>s+x.amount,0),do_=day.filter(x=>x.type==='out').reduce((s,x)=>s+x.amount,0);
+ todaySummary.innerHTML=`<p>Uang masuk: <b class="in">${money(di)}</b></p><p>Pengeluaran: <b class="out">${money(do_)}</b></p><p>Transaksi: <b>${day.length}</b></p>`;
+}
+function page(p){
+ ['dashboardPage','transactionsPage','reportsPage'].forEach(x=>document.getElementById(x).classList.add('hidden'));
+ document.getElementById(p+'Page').classList.remove('hidden');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ if(p==='dashboard'){navDashboard.classList.add('active');pageTitle.textContent='Dashboard 💗'}
+ if(p==='transactions'){navTransactions.classList.add('active');pageTitle.textContent='Transaksi 🧾'}
+ if(p==='reports'){navReports.classList.add('active');pageTitle.textContent='Laporan 📊'}
+ renderAll();
+}
+function clearTxFilters(){txDate.value='';txMonth.value=activeMonth.value;renderTransactions()}
+function renderTransactions(){
+ let m=txMonth.value||activeMonth.value||currentMonth(),date=txDate.value;
+ let list=txForMonth(m).filter(x=>!date||x.date===date).sort((a,b)=>(b.date+b.created).localeCompare(a.date+a.created));
+ transactionTable.innerHTML=list.length?`<table class="tx"><tr><th>Tanggal</th><th>Jenis</th><th>Yang dibeli / keterangan</th><th>Nominal</th><th></th></tr>${list.map(x=>`<tr><td>${x.date}</td><td>${x.type==='in'?'📥 Masuk':'📤 Keluar'}</td><td>${esc(x.note)}</td><td class="${x.type==='in'?'in':'out'}">${x.type==='in'?'+':'−'}${money(x.amount)}</td><td><button class="danger" onclick="deleteTx('${x.id}')">Hapus</button></td></tr>`).join('')}</table>`:'<div class="empty">Tidak ada transaksi untuk pilihan ini 🌷</div>';
+}
+function deleteTx(id){if(!confirm('Hapus transaksi ini?'))return;currentUser.transactions=currentUser.transactions.filter(x=>x.id!==id);users[currentUser.email]=currentUser;save();renderAll();toast('Transaksi dihapus.')}
+function openBalance(){
+ let m=activeMonth.value||currentMonth(),a=getMonth(m);
+ modalBox.innerHTML=`<div class="modal-head"><h3>Saldo awal bulan 💰</h3><button class="close" onclick="closeModal()">×</button></div><p>Atur saldo awal khusus untuk <b>${m}</b>. Pengeluaran dan uang masuk bulan ini akan otomatis dihitung.</p><div class="field"><label>Saldo awal</label><input id="balanceInput" type="number" min="0" value="${a.initial||0}"></div><button class="primary" onclick="saveBalance('${m}')">Simpan saldo</button>`;
+ modal.classList.remove('hidden');
+}
+function saveBalance(m){getMonth(m).initial=Number(balanceInput.value)||0;users[currentUser.email]=currentUser;save();closeModal();renderAll();toast('Saldo bulan berhasil diperbarui 💗')}
+function openTransaction(type){
+ let m=activeMonth.value||currentMonth(),today=new Date().toISOString().slice(0,10);
+ modalBox.innerHTML=`<div class="modal-head"><h3>${type==='out'?'Pengeluaran 📤':'Uang Masuk 📥'}</h3><button class="close" onclick="closeModal()">×</button></div>
+ <div class="form-grid"><div class="field"><label>Tanggal</label><input id="txNewDate" type="date" value="${today}"></div><div class="field"><label>Nominal</label><input id="txNewAmount" type="number" min="1" placeholder="55000"></div></div>
+ <div class="field"><label>${type==='out'?'Apa yang dibeli / keterangan':'Sumber uang / keterangan'}</label><input id="txNewNote" placeholder="${type==='out'?'Contoh: makan, skincare, bensin':'Contoh: gaji, transfer, uang tambahan'}"></div>
+ <button class="primary" onclick="saveTx('${type}')">Simpan transaksi 💗</button>`;
+ modal.classList.remove('hidden');
+}
+function saveTx(type){
+ let d=txNewDate.value,amount=Number(txNewAmount.value)||0,note=txNewNote.value.trim();
+ if(!d||amount<=0||!note)return toast('Tanggal, nominal, dan keterangan wajib diisi.');
+ let m=d.slice(0,7);getMonth(m);
+ let t={id:uid(),type,date:d,amount,note,created:new Date().toISOString()};
+ currentUser.transactions.push(t);users[currentUser.email]=currentUser;save();activeMonth.value=m;txMonth.value=m;reportMonth.value=m;closeModal();renderAll();toast(type==='out'?'Pengeluaran dicatat 💗':'Uang masuk ditambahkan 💰');
+}
+function renderReports(){
+ let m=reportMonth.value||currentMonth(),date=reportDate.value,t=totals(m),list=date?t.tx.filter(x=>x.date===date):t.tx;
+ let title=date?`Detail ${date}`:`Ringkasan ${m}`;
+ let days={};list.forEach(x=>(days[x.date]??=[]).push(x));
+ reportContent.innerHTML=`<div class="grid" style="margin-bottom:18px"><div class="card stat"><small>Saldo awal</small><b>${money(t.initial)}</b></div><div class="card stat"><small>Uang masuk</small><b class="in">${money(t.ins)}</b></div><div class="card stat"><small>Pengeluaran</small><b class="out">${money(t.outs)}</b></div><div class="card stat balance"><small>Sisa saldo</small><b>${money(t.balance)}</b></div></div>
+ <h3>${title}</h3><div class="report-list">${Object.keys(days).sort().reverse().map(d=>{let a=days[d],ins=a.filter(x=>x.type==='in').reduce((s,x)=>s+x.amount,0),out=a.filter(x=>x.type==='out').reduce((s,x)=>s+x.amount,0);return `<div class="day-row"><strong>📅 ${d}</strong><span class="in">Masuk ${money(ins)}</span> · <span class="out">Keluar ${money(out)}</span> · ${a.length} transaksi<br><small>${a.map(x=>`${x.type==='in'?'📥':'📤'} ${esc(x.note)} — ${money(x.amount)}`).join('<br>')}</small></div>`}).join('')||'<div class="empty">Belum ada catatan 🌷</div>'}</div>`;
+ let months=Object.keys(currentUser.months).sort().reverse();
+ monthHistory.innerHTML=months.length?months.map(x=>{let q=totals(x);return `<div class="day-row"><strong>🗓️ ${x}</strong>Saldo awal <b>${money(q.initial)}</b> · Masuk <b class="in">${money(q.ins)}</b> · Keluar <b class="out">${money(q.outs)}</b> · Sisa <b>${money(q.balance)}</b></div>`}).join(''):'<div class="empty">Belum ada bulan tersimpan.</div>';
+}
+function openProfile(){
+ modalBox.innerHTML=`<div class="modal-head"><h3>Profil saya 👩</h3><button class="close" onclick="closeModal()">×</button></div>
+ <div style="display:flex;gap:20px;align-items:center;margin:15px 0"><img id="profilePreview" class="preview" src="${currentUser.avatar||'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐰</text></svg>'}"><div><input id="avatarFile" type="file" accept="image/*" onchange="previewAvatar(event)"><button class="danger" style="margin-top:8px" onclick="removeAvatar()">Hapus foto</button></div></div>
+ <div class="field"><label>Nama</label><input id="profileName" value="${esc(currentUser.name)}"></div>
+ <div class="field"><label>Email</label><input value="${esc(currentUser.email)}" disabled></div>
+ <button class="primary" onclick="saveProfile()">Simpan profil</button>`;
+ modal.classList.remove('hidden');
+}
+function previewAvatar(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{currentUser._preview=r.result;profilePreview.src=r.result};r.readAsDataURL(f)}
+function removeAvatar(){currentUser.avatar='';currentUser._preview='';profilePreview.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐰</text></svg>'}
+function saveProfile(){currentUser.name=profileName.value.trim()||currentUser.name;if(currentUser._preview){currentUser.avatar=currentUser._preview;delete currentUser._preview}users[currentUser.email]=currentUser;save();updateProfileMini();closeModal();toast('Profil diperbarui ✨')}
+function closeModal(){modal.classList.add('hidden')}
+modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});
+
+window.addEventListener('load',()=>{
+ let s=localStorage.getItem('mmj_session');if(s&&users[s]){currentUser=users[s];startApp()}else showLogin();
+});
+</script>
+</body>
+</html>
